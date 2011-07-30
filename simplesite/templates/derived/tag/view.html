@@ -1,0 +1,21 @@
+<%inherit file="/base/index.html"/>
+
+<%def name="title()">Tag</%def>
+<%def name="heading()"><h1>Tag</h1></%def>
+
+${c.tag.name}
+
+<%def name="footer()">
+## Then add our tag links
+<p>
+  <a href="${h.url_for(controller='tag', action='list')}">All Tags</a>
+| <a href="${h.url_for(controller='tag', action='new')}">New Tag</a>
+| <a href="${h.url_for(controller='tag', action='edit',
+        id=c.tag.id)}">Edit Tag</a>
+| <a href="${h.url_for(controller='tag', action='delete',
+        id=c.tag.id)}">Delete Tag</a>
+</p>
+# Include the parent footer too
+${parent.footer()}
+</%def>
+
