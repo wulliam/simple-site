@@ -35,6 +35,11 @@ ${c.page.content}
 <a href="${h.url_for(pageid=c.page.id, controller='comment', action='list')}">Comment (${str(c.comment_count)})</a>
 | <a href="${h.url_for(pageid=c.page.id, controller='comment', action='new')}">Add Comment </a>
 </p>
+### Section links
+<p>
+<a href="${h.url_for(controller='section', action='new', section=c.page.section, before=c.page.before)}">New Section</a>
+| <a href="${h.url_for(controller='section', action='edit', id=c.page.section)}">Edit Section</a>
+| <a href="${h.url_for(controller='section', action='delete', id=c.page.section)}">Delete Section and Index Page</a>
 ### tag link
 <p>
 <a href="${h.url_for(controller='tag', action='list')}">Tag list</a>

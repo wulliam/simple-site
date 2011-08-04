@@ -1,0 +1,6 @@
+<%inherit file="/base/index.html"/>
+
+<%def name="heading()"><h1>Create Section</h1></%def>
+<p><a href="${h.url_for(controller='section', action='new',
+    section=c.section, path=c.path)}">Create a new section here</a>.</p>
+

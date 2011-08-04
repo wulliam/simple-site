@@ -11,11 +11,7 @@
         <td valign="top">
             ${h.link_to(
                 page.id,
-                h.url_for(
-                    controller=u'page',
-                    action='view',
-                    id=unicode(page.id)
-                )
+                h.url_for('path', id=page.id)
             )}
         </td>
         <td valign="top">

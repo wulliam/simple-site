@@ -1,0 +1,25 @@
+${h.field(
+    "Name",
+    h.text(name='name'),
+    required=True,
+)}
+${h.field(
+    "Path",
+    h.text(name='path'),
+    required=True,
+)}
+${h.field(
+    "Section",
+    h.select(
+        'section',
+        id = 'section',
+        selected_values=[],
+        options=c.available_sections,
+        ),
+        required=True
+)}
+${h.field(
+    'Before',
+    h.text('before', id='before'),
+)}
+

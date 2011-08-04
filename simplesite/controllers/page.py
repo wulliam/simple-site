@@ -14,10 +14,24 @@ from simplesite.model import meta
 import simplesite.lib.helpers as h
 import webhelpers.paginate as paginate
 from sqlalchemy import delete
+from simplesite.controllers.nav import NewNavForm, ValidBefore
 
 log = logging.getLogger(__name__)
 
-class NewPageForm(formencode.Schema):
+class UniquePagePath(formencode.validators.FancyValidator):
+    def _to_python(self, values, state):
+        nav_q = meta.Session.query(model.Nav)
+        query = nav_q.filter_by(section=values['section'],
+            type='page', path=values['path'])
+        if request.urlvars['action'] == 'save':
+            query = query.filter(model.Nav.id != int(request.urlvars['id']))
+        existing = query.first()
+        if existing is not None:
+            raise formencode.Invalid("There is already a page in this "
+                "section with this path", values, state)
+        return values
+
+class NewPageForm(NewNavForm):
     allow_extra_fields = True
     filter_extra_fields = True
     content = formencode.validators.String(
@@ -28,6 +42,7 @@ class NewPageForm(formencode.Schema):
     )
     heading = formencode.validators.String()
     title = formencode.validators.String(not_empty=True)
+    chained_validators = [ValidBefore(), UniquePagePath()]
 
 class ValidTags(formencode.FancyValidator):
     def _to_pyton(self, value, state):
@@ -48,6 +63,9 @@ class ValidTagsForm(formencode.Schema):
     chained_validators = [ValidTags()]
 
 class PageController(BaseController):
+    def _before(self):
+        nav_q = meta.Session.query(model.Page)
+        c.available_sections = [(nav.id, nav.name) for nav in nav_q.filter_by(type='section')]
 
     def index(self):
         # Return a rendered template
@@ -76,7 +94,7 @@ class PageController(BaseController):
         meta.Session.commit()
         session['flash'] = 'Tags successfully updated'
         session.save()
-        return redirect_to(controller='page', action='view', id=page.id)
+        return redirect_to('path', id=page.id)
 
     def view(self, id):
         if id is None:
@@ -89,10 +107,17 @@ class PageController(BaseController):
         tag_q = meta.Session.query(model.Tag)
         c.available_tags = [(tag.id, tag.name) for tag in tag_q]
         c.selected_tags = {'tags':[str(tag.id) for tag in c.page.tags]}
+        c.menu = request.environ['simplesite.navigation']['menu']
+        c.tabs = request.environ['simplesite.navigation']['tabs']
+        c.breadcrumbs = request.environ['simplesite.navigation']['breadcrumbs']
         return render('/derived/page/view.html')
         
     def new(self):
-        return render('/derived/page/new.html')
+        values = {}
+        values.update(request.params)
+        if values.has_key('before') and values['before'] == u'None':
+            del values['before']
+        return htmlfill.render(render('/derived/page/new.html'), values)
 
     @restrict('POST')
     @validate(schema=NewPageForm(), form='new')
@@ -101,6 +126,8 @@ class PageController(BaseController):
         for k, v in self.form_result.items():
             setattr(page, k, v)
         meta.Session.add(page)
+        model.Nav.add_navigation_node(page, self.form_result['section'],
+            self.form_result['before'])
         meta.Session.commit()
         response.status_int = 302
         response.headers['location'] = h.url_for(controller='page', action='view', id=page.id)
@@ -114,6 +141,10 @@ class PageController(BaseController):
         if page is None:
             abort(404)
         values = {
+            'name' : page.name,
+            'path' : page.path,
+            'section' : page.section,
+            'before' : page.before,
             'title': page.title,
             'heading': page.heading,
             'content': page.content
@@ -128,6 +159,11 @@ class PageController(BaseController):
         page = page_q.filter_by(id=id).first()
         if page is None:
             abort(404)
+        if not (page.section == self.form_result['section'] and \
+            page.before == self.form_result['before']):
+            model.Nav.remove_navigation_node(page)
+            model.Nav.add_navigation_node(page, self.form_result['section'],
+                self.form_result['before'])
         for k,v in self.form_result.items():
             if getattr(page, k) != v:
                 setattr(page, k, v)
@@ -151,11 +187,14 @@ class PageController(BaseController):
         return render('/derived/page/list.html')
           
     def delete(self, id=None):
-       if id is None:
-           abort(404)
-       page_q = meta.Session.query(model.Page)
-       page = page_q.filter_by(id=id).first()
-       meta.Session.delete(page)
-       meta.Session.execute(delete(model.pagetag_table, model.pagetag_table.c.pageid==page.id))
-       meta.Session.commit()
-       return render('/derived/page/deleted.html')      
+        if id is None:
+            abort(404)
+        page_q = meta.Session.query(model.Page)
+        page = page_q.filter_by(id=id).first()
+        if page is None:
+            abort(404)
+        meta.Session.execute(delete(model.pagetag_table, model.pagetag_table.c.pageid==page.id))
+        model.Nav.remove_navigation_node(page)
+        meta.Session.delete(page)
+        meta.Session.commit()
+        return render('/derived/page/deleted.html')      

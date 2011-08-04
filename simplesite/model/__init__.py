@@ -43,7 +43,7 @@ def now():
 
 page_table = schema.Table('page', meta.metadata,
     schema.Column('id', types.Integer,
-        schema.Sequence('page_seq_id', optional=True), primary_key=True),
+        schema.ForeignKey('nav.id'), primary_key=True),
     schema.Column('content', types.Text(), nullable=False),
     schema.Column('posted', types.DateTime(), default=now),
     schema.Column('title', types.Unicode(255), default=u'Untitled Page'),
@@ -74,7 +74,53 @@ tag_table = schema.Table('tag', meta.metadata,
     schema.Column('name', types.Unicode(20), nullable=False, unique=True),
 )
 
-class Page(object):
+nav_table = schema.Table('nav', meta.metadata,
+    schema.Column('id', types.Integer(),
+        schema.Sequence('nav_id_seq', optional=True), primary_key=True),
+    schema.Column('name', types.Unicode(255), default=u'Untitled Node'),
+    schema.Column('path', types.Unicode(255), default=u''),
+    schema.Column('section', types.Integer(), schema.ForeignKey('nav.id')),
+    schema.Column('before', types.Integer(), default=None),
+    schema.Column('type', types.String(30), nullable=False)
+    )
+
+section_table = schema.Table('section', meta.metadata,
+    schema.Column('id', types.Integer,
+        schema.ForeignKey('nav.id'), primary_key = True),
+   ) 
+
+class Nav(object):
+    @staticmethod
+    def add_navigation_node(nav, section, before):
+        nav_q = meta.Session.query(Nav)
+        new_before = nav_q.filter_by(section=section, before=before).first()
+        if new_before is not None and new_before_id != nav.id:
+            new_before.before = nav.id
+
+    @staticmethod
+    def remove_navigation_node(nav):
+        nav_q = meta.Session.query(Nav)
+        old_before = nav_q.filter_by(section='section', before=nav.id).first()
+        if old_before is not None:
+            old_before.before = nav.before
+            
+    @staticmethod
+    def nav_to_path(id):
+        nav_q = meta.Session.query(Nav)
+        nav = nav_q.filter_by(id=id).one()
+        path = nav.path
+        if nav.type=='section':
+            path += '/'
+        while nav.section is not None:
+            nav = nav_q.filter_by(type='section', id=nav.section).one()
+            path = nav.path+'/'+path
+        return path
+    
+
+class Page(Nav):
+    pass
+
+class Section(Nav):
     pass
 
 class Comment(object):
@@ -85,7 +131,9 @@ class Tag(object):
 
 orm.mapper(Comment, comment_table)
 orm.mapper(Tag, tag_table)
-orm.mapper(Page, page_table, properties={
+orm.mapper(Nav, nav_table, polymorphic_on = nav_table.c.type, polymorphic_identity='nav')
+orm.mapper(Section, section_table, inherits=Nav, polymorphic_identity='section')
+orm.mapper(Page, page_table, inherits=Nav, polymorphic_identity='page', properties={
    'comments':orm.relation(Comment, backref='page',cascade='all'),
    'tags':orm.relation(Tag, secondary=pagetag_table)
 })

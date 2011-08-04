@@ -6,7 +6,7 @@
 ${c.comment.content}
 <p><em>Posted by ${c.comment.name} on ${c.comment.created.strftime('%c')}.</em></p>
 
-<p><a href="${h.url_for(controller='page', action='view', id=c.comment.pageid)}">Visit the page this comment was posted on.</a></p>
+<p><a href="${h.url_for('path', id=c.comment.pageid)}">Visit the page this comment was posted on.</a></p>
 <%def name="footer()">
 ## add our comment link
 <p><a href="${h.url_for(pageid=c.page.id, controller='comment', action='edit', id=c.comment.id)}">edit comment.</a>

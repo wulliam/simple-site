@@ -1,5 +1,5 @@
 ## -*- coding: utf-8 -*-
-
+<%namespace name="navigation" file="/component/navigation.html" import="*" />\
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
 "http://www.w3.org/TR/html4/strict.dtd">
 <html>
@@ -24,10 +24,10 @@
 ${h.stylesheet_link(h.url_for('/css/main.css'))}
 </%def>
 <%def name="header()"><a name="top"></a></%def>
-<%def name="tabs()"></%def>
-<%def name="menu()"></%def>
+<%def name="tabs()">${navigation.tabs()}</%def>
+<%def name="menu()">${navigation.menu()}</%def>
 <%def name="heading()"><h1>${hasattr(c, 'heading') and c.heading or 'No Title'}</h1></%def>
-<%def name="breadcrumbs()"></%def>
+<%def name="breadcrumbs()">${navigation.breadcrumbs()}</%def>
 <%def name="footer()"><p><a href="#top">Top ^</a></p></%def>
 <%def name="flash()">
     % if session.has_key('flash'):
