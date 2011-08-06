@@ -15,8 +15,8 @@ ${h.field(
         id = 'section',
         selected_values=[],
         options=c.available_sections,
-        onchange="callAjax('%s', 'section', 'before'); return false;"%(
-            h.url_for(controller="nav", action="before_field_options")
+        onchange="callAjaxJason('%s', 'section', 'before'); return false;"%(
+            h.url_for(controller="nav", action="before_field_json")
         ),
         ),
         required=True
@@ -33,6 +33,7 @@ ${h.field(
 <%def name="js()">
     <script src="/yui/2.9.0/yahoo-dom-event/yahoo-dom-event.js" type="text/javascript"></script>
     <script src="/yui/2.9.0/connection/connection-min.js" type="text/javascript"></script>
+    <script src="/yui/2.9.0/json/json-min.js" type="text/javascript"></script>
 
     <script type="text/javascript">
     function callAjax(url, field, replace){
@@ -48,6 +49,35 @@ ${h.field(
         var transaction=YAHOO.util.Connect.asyncRequest('GET', url, callback, null);
     }
     </script>
+    
+    <script type="text/javascript">
+    function callAjaxJason(url, field, replace){
+        var callback = {
+            success: function(o) {
+                var parsed_options = YAHOO.lang.JSON.parse(o.responseText);
+                var before = document.getElementById(replace);
+                // Remove current options
+                while(before.hasChildNodes() === true)
+                {
+                    before.removeChild(before.childNodes[0]);
+                }
+                // Add new options
+                for (var i=0; i<parsed_options.options.length; i++) {
+                    var new_option = document.createElement('option');
+                    new_option.text = parsed_options.options[i].id;
+                    new_option.value =  parsed_options.options[i].value;
+                    before.appendChild(new_option);
+                }
+            },
+            failure: function(o) {
+                alert("Failed to retrieve required information.");
+            }
+        }
+        url = url +'?selected='+YAHOO.util.Dom.get(field).value;
+        var transaction = YAHOO.util.Connect.asyncRequest('GET', url, callback, null);
+    }
+    </script>
+    
 </%def>
 
 

@@ -8,7 +8,7 @@ from simplesite.model import meta
 from simplesite import model
 import formencode
 from webhelpers.html.tags import HTML
-
+from pylons.decorators import jsonify
 
 log = logging.getLogger(__name__)
 
@@ -46,4 +46,15 @@ class NavController(BaseController):
             result.append(HTML.option(label, value=id))
         result.append(HTML.option('[At the end]', value=''))
         return u''.join(result)
+
+    @jsonify
+    def before_field_json(self):
+        result = {
+            'options': [
+                 dict(id=id, value=value) for value, id in model.Nav.get_before_options(
+                     request.params.getone('selected'))
+             ]
+        }
+        result['options'].append({'id': u'[At the end]', 'value': u''})
+        return result
 
