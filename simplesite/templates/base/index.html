@@ -6,6 +6,7 @@
 <head>
     <title>${self.title()}</title>
     ${self.head()}
+    ${self.js()}
 </head>
 <body>
     ${self.header()}
@@ -38,3 +39,4 @@ ${h.stylesheet_link(h.url_for('/css/main.css'))}
     %>
     % endif
 </%def>  
+<%def name="js()"></%def>

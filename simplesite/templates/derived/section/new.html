@@ -1,5 +1,6 @@
 <%inherit file="/base/index.html" />
 <%namespace file="fields.html" name="fields" import="*"/>
+<%namespace file="/derived/nav/fields.html" name="navfields" import="js"/>
 
 <%def name="heading()">
     <h1 class="main">Create a New Section</h1>
@@ -10,3 +11,7 @@ ${h.form_start(h.url_for(controller='section', action='create'), method="post")}
     ${h.field(field=h.submit(value="Create Section", name='submit'))}
 ${h.form_end()}
 
+<%def name="js()">
+    ${parent.js()}
+    ${navfields.js()}
+</%def>

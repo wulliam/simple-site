@@ -63,6 +63,12 @@ class ValidTagsForm(formencode.Schema):
     chained_validators = [ValidTags()]
 
 class PageController(BaseController):
+    
+    def __before__(self, id=None):
+        nav_q = meta.Session.query(model.Nav)
+        c.available_sections = [(nav.id, nav.name) for nav in nav_q]    
+        log.info(str(c.available_sections))
+        
     def _before(self):
         nav_q = meta.Session.query(model.Page)
         c.available_sections = [(nav.id, nav.name) for nav in nav_q.filter_by(type='section')]
@@ -117,6 +123,8 @@ class PageController(BaseController):
         values.update(request.params)
         if values.has_key('before') and values['before'] == u'None':
             del values['before']
+        c.before_options = model.Nav.get_before_options(values.get('section', 0))
+        c.before_options.append(['', '[At the end]'])
         return htmlfill.render(render('/derived/page/new.html'), values)
 
     @restrict('POST')
@@ -150,6 +158,8 @@ class PageController(BaseController):
             'content': page.content
         }
         c.title = page.title
+        c.before_options = model.Nav.get_before_options(page.section, page.id)
+        c.before_options.append(['', '[At the end]'])
         return htmlfill.render(render('/derived/page/edit.html'), values)
         
     @restrict('POST')

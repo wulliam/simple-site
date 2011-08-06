@@ -7,6 +7,7 @@ from simplesite.lib.base import BaseController, render
 from simplesite.model import meta
 from simplesite import model
 import formencode
+from webhelpers.html.tags import HTML
 
 
 log = logging.getLogger(__name__)
@@ -38,4 +39,11 @@ class NavController(BaseController):
 
     def nosection(self, section, path):
         return render('/derived/nav/create_section.html')
+    
+    def before_field_options(self):
+        result = []
+        for id, label in model.Nav.get_before_options(request.params.getone('selected')):
+            result.append(HTML.option(label, value=id))
+        result.append(HTML.option('[At the end]', value=''))
+        return u''.join(result)
 

@@ -76,6 +76,12 @@ class SectionController(BaseController):
         return 'Hello World'
         
     def new(self):
+        values = {}
+        values.update(request.params)
+        if values.has_key('before') and values['before'] == u'None':
+            values['before'] = ''
+        c.before_options = model.Nav.get_before_options(values.get('section', 0))
+        c.before_options.append(['', '[At the end]'])
         return render('/derived/section/new.html')
 
     @restrict('POST')
@@ -111,6 +117,8 @@ class SectionController(BaseController):
             'section': section.section,
             'before' : section.before,
         }
+        c.before_options = model.Nav.get_before_options(section.section, section.id)
+        c.before_options.append(['', '[At the end]'])
         return htmlfill.render(render('/derived/section/edit.html'), values)
         
     @restrict('POST')

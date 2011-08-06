@@ -2,12 +2,16 @@ span.error-message, span.required {
     font-weight: bold;
     color:#f00;
 }
+
 #flash {
     background: #ffc;
     padding: 5px;
     border: 1px dotted #000;
     margin-bottom: 20px;
+    height: 0px;
+    overflow: hidden;   /* so we can animate from zero height */
 }
+
 #flash p { margin: 0px; padding: 0px; }
 
 #maintabs ul {

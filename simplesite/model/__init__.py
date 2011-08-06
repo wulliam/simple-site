@@ -116,6 +116,13 @@ class Nav(object):
             path = nav.path+'/'+path
         return path
     
+    @staticmethod
+    def get_before_options(section, exclude=None):
+        nav_q = meta.Session.query(Nav)
+        query = nav_q.filter_by(section=section)
+        if exclude is not None:
+            query = query.filter(Nav.id != exclude)
+        return [(nav.id, nav.name) for nav in query.all()]
 
 class Page(Nav):
     pass
