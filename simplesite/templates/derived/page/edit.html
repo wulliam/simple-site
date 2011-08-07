@@ -17,4 +17,40 @@ ${h.form_end()}
 <%def name="js()">
     ${parent.js()}
     ${navfields.js()}
+
+    <script type="text/javascript"
+        src="/yui/2.9.0/element/element-min.js"></script>
+    <script type="text/javascript"
+        src="/yui/2.9.0/container/container_core-min.js"></script>
+    <script type="text/javascript"
+        src="/yui/2.9.0/editor/simpleeditor-min.js"></script>
+
+    <script type="text/javascript">
+    (function() {
+        // Set up some private variables
+        var Dom = YAHOO.util.Dom;
+        var Event = YAHOO.util.Event;
+
+        // The SimpleEditor config
+        var myConfig = {
+            height: '200px',
+            width: '630px',
+            dompath: true,
+            focusAtStart: true,
+            handleSubmit: true
+        };
+
+        // Now let's load the SimpleEditor..
+        var myEditor = new YAHOO.widget.SimpleEditor('editor', myConfig);
+        myEditor._defaultToolbar.buttonType = 'advanced';
+        document.e = myEditor;
+        myEditor._defaultToolbar.titlebar = 'Rich Text Editor';
+        myEditor.render();
+    })();
+    </script>
+</%def>
+
+<%def name="head()">
+    ${parent.head()}
+    ${h.stylesheet_link(h.url_for('/yui/2.9.0/assets/skins/sam/skin.css'))}
 </%def>

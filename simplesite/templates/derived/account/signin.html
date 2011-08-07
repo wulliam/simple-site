@@ -1,0 +1,16 @@
+<%inherit file="/base/index.html"/>
+
+<%def name="title()">Sign In</%def>
+<%def name="heading()"><h1>Sign In</h1></%def>
+
+${h.form_start('FORM_ACTION', method="post")}
+    ${h.field(
+        "Username",
+        h.text(name='username'),
+    )}
+    ${h.field(
+        "Password",
+        h.text(name='password'),
+    )}
+    ${h.field(field=h.submit(value="Sign in", name='submit'))}
+${h.form_end()}

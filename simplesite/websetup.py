@@ -5,6 +5,7 @@ from simplesite.config.environment import load_environment
 from simplesite.model import meta
 from simplesite import model
 import os
+from authkit.users.sqlalchemy_driver import UsersFromDatabase
 
 log = logging.getLogger(__name__)
 
@@ -13,6 +14,10 @@ def setup_app(command, conf, vars):
     load_environment(conf.global_conf, conf.local_conf)
 
     meta.metadata.bind = meta.engine
+    
+    log.info("Adding the AuthKit model...")
+    users = UsersFromDatabase(model)
+
     filename = os.path.split(conf.filename)[-1]
     if filename == 'test.ini':
         log.info('Dropping existing tables...')
@@ -20,6 +25,35 @@ def setup_app(command, conf, vars):
          
     # Create the tables if they don't already exist
     meta.metadata.create_all(checkfirst=True)
+    
+    log.info("Adding roles and uses...")
+
+    users.role_create("delete")
+    users.user_create("foo", password="bar")
+    users.user_create("admin", password="opensesame")
+    users.user_add_role("admin", role="delete")
+    
+    log.info("Adding tags...")
+
+    tag1 = model.Tag()
+    tag1.name = u'Pylons'
+    meta.Session.add(tag1)
+    
+    tag2 = model.Tag()
+    tag2.name = u'Paste'
+    meta.Session.add(tag2)
+    
+    tag3 = model.Tag()
+    tag3.name = u'Tutorial'
+    meta.Session.add(tag3)
+    
+    tag4 = model.Tag()
+    tag4.name = u'Database'
+    meta.Session.add(tag4)
+    
+    tag5 = model.Tag()
+    tag5.name = u'Recipe'
+    meta.Session.add(tag5)
 
     log.info("Adding homepage...")
     section_home = model.Section()

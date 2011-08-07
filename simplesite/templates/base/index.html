@@ -8,28 +8,59 @@
     ${self.head()}
     ${self.js()}
 </head>
-<body>
-    ${self.header()}
-    ${self.tabs()}
-    ${self.menu()}
-    ${self.heading()}
-    ${self.breadcrumbs()}
-    ${self.flash()}
-    ${next.body()}
-    ${self.footer()}
+<body class="yui-skin-sam">
+    <div id="doc3" class="yui-t5">
+        <div id="hd">
+             <div class="yui-gc">
+                 <div class="yui-u first">${self.heading()}</div>
+                 <div class="yui-u">
+		            ##% if h.auth.authorized(h.auth.is_valid_user) and not (request.urlvars['controller'] == 'account' and request.urlvars['action'] == 'signout'):
+		            % if h.auth.authorized(h.auth.is_valid_user) and not (request.urlvars['controller'] == 'account' and request.urlvars['action'] in ['signout', 'signinagain']):
+		                <p>Signed in as ${request.environ['REMOTE_USER']},
+		                    <a href="${h.url_for('signout')}">Sign out</a></p>
+		            % else:
+		                <p><a href="${h.url_for('signin')}">Sign in</a></p>
+		            % endif
+		        </div>
+             </div>
+            ${self.header()}
+            ${self.tabs()}
+        </div>
+        <div id="bd">
+            <div id="yui-main">
+                <div class="yui-b">
+                    ${self.breadcrumbs()}
+                    ${self.flash()}
+                    ${next.body()}
+                </div>
+            </div>
+            <div class="yui-b">
+                 ${self.menu()}
+            </div>
+        </div>
+        <div id="ft">
+            ${self.footer()}
+        </div>
+   </div>
 </body>
 </html>
 
 <%def name="title()">SimpleSite</%def>
 <%def name="head()">
-${h.stylesheet_link(h.url_for('/css/main.css'))}
+    ${h.stylesheet_link(h.url_for('/yui/2.9.0/reset-fonts-grids/reset-fonts-grids.css'))}
+    ${h.stylesheet_link(h.url_for('/css/main.css'))}
 </%def>
 <%def name="header()"><a name="top"></a></%def>
 <%def name="tabs()">${navigation.tabs()}</%def>
 <%def name="menu()">${navigation.menu()}</%def>
 <%def name="heading()"><h1>${hasattr(c, 'heading') and c.heading or 'No Title'}</h1></%def>
 <%def name="breadcrumbs()">${navigation.breadcrumbs()}</%def>
-<%def name="footer()"><p><a href="#top">Top ^</a></p></%def>
+<%def name="footer()">
+    <p>
+        <a href="${h.url_for('/')}">[Home]</a> |
+        <a href="#top">Top ^</a>
+    </p>
+</%def>
 <%def name="flash()">
     % if session.has_key('flash'):
     <div id="flash"><p>${session.get('flash')}</p></div>

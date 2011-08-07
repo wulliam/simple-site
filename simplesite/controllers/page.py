@@ -15,6 +15,7 @@ import simplesite.lib.helpers as h
 import webhelpers.paginate as paginate
 from sqlalchemy import delete
 from simplesite.controllers.nav import NewNavForm, ValidBefore
+from authkit.authorize.pylons_adaptors import authorize
 
 log = logging.getLogger(__name__)
 
@@ -140,8 +141,10 @@ class PageController(BaseController):
         response.status_int = 302
         response.headers['location'] = h.url_for(controller='page', action='view', id=page.id)
         return "Moved temporarily"
-        
+    
+    #@authorize(h.auth.is_valid_user)    
     def edit(self, id=None):
+        log.info("in edit action....")
         if id is None:
             abort(404)
         page_q = meta.Session.query(model.Page)
@@ -162,6 +165,7 @@ class PageController(BaseController):
         c.before_options.append(['', '[At the end]'])
         return htmlfill.render(render('/derived/page/edit.html'), values)
         
+    @authorize(h.auth.is_valid_user)    
     @restrict('POST')
     @validate(schema=NewPageForm(), form='edit')
     def save(self, id=None):
@@ -184,7 +188,8 @@ class PageController(BaseController):
         response.headers['location'] = h.url_for(controller='page', action='view',
             id=page.id)
         return "Moved temporarily"
-         
+     
+    @authorize(h.auth.has_delete_role)        
     def list(self):
         records = meta.Session.query(model.Page)
         c.paginator = paginate.Page(
@@ -195,7 +200,8 @@ class PageController(BaseController):
             action='list',
             )
         return render('/derived/page/list.html')
-          
+     
+    @authorize(h.auth.has_delete_role)      
     def delete(self, id=None):
         if id is None:
             abort(404)

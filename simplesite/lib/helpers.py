@@ -11,3 +11,6 @@ from webhelpers.html.tags import *
 from routes import url_for
 from webhelpers.html.tags import link_to
 from formbuild.helpers import checkbox_group
+from simplesite.lib import auth
+from webhelpers.html.tags import password
+

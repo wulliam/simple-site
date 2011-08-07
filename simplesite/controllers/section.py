@@ -103,7 +103,8 @@ class SectionController(BaseController):
         response.status_int = 302
         response.headers['location'] = h.url_for(controller='section', action='view', id=section.id)
         return "Moved temporarily"
-        
+    
+    @authorize(h.auth.is_valid_user)    
     def edit(self, id=None):
         if id is None:
             abort(404)
@@ -120,7 +121,8 @@ class SectionController(BaseController):
         c.before_options = model.Nav.get_before_options(section.section, section.id)
         c.before_options.append(['', '[At the end]'])
         return htmlfill.render(render('/derived/section/edit.html'), values)
-        
+    
+    @authorize(h.auth.is_valid_user)     
     @restrict('POST')
     @validate(schema=EditSectionForm(), form='edit')
     def save(self, id=None):
@@ -154,7 +156,8 @@ class SectionController(BaseController):
             action='list',
             )
         return render('/derived/section/list.html')
-          
+    
+    @authorize(h.auth.has_delete_role)         
     def delete(self, id=None):
         if id is None:
             abort(404)

@@ -3,48 +3,71 @@
 <%def name="title()">${c.page.title}</%def>
 <%def name="heading()"><h1>${c.page.heading or c.page.title}</h1></%def>
 
-${c.page.content}
+##${c.page.content}
+${(c.page.content)}
 
 <%def name="tags(available_tags)">
     <h2>Tags</h2>
     ${h.form_start(h.url_for(controller='page', action='update_tags', id=c.page.id), method='post')}
-        ${h.field("Tags",
-            h.checkbox_group('tags', selected_values=None, align="table", options=available_tags))}
-        ${h.field(field=h.submit(value="Save Tags", name='submit'))}
+        ${h.checkbox_group(name='tags', selected_values=None, align="vert", options=available_tags)}
+        ${h.submit(value="Save Tags", name='submit')}
     ${h.form_end()}
 </%def>
+
 <%!
     from formencode import htmlfill
     from webhelpers.html import literal
 %>
+<%def name="menu()">
+${parent.menu()}
 % if c.available_tags:
-    ${literal(htmlfill.render(capture(self.tags, c.available_tags), c.selected_tags))}
+${literal(htmlfill.render(capture(self.tags, c.available_tags), c.selected_tags))}
 % endif
+</%def>
 <%def name="footer()">
 ## Then add our page links
 <p>
-  <a href="${h.url_for(controller='page', action='list')}">All Pages</a>
-| <a href="${h.url_for(controller='page', action='new')}">New Page</a>
-| <a href="${h.url_for(controller='page', action='edit',
-        id=c.page.id)}">Edit Page</a>
-| <a href="${h.url_for(controller='page', action='delete',
-        id=c.page.id)}">Delete Page</a>
+% if h.auth.authorized(h.auth.has_delete_role):
+  <a href="${h.url_for(controller='page', action='list')}">All Pages</a> |
+% endif
+<a href="${h.url_for(controller='page', action='new', section=c.page.section,
+before=c.page.before)}">New Page</a>
+##% if h.auth.authorized(h.auth.is_valid_user):
+| <a href="${h.url_for(controller='page', action='edit', id=c.page.id)}">Edit
+Page</a>
+##% endif
+% if h.auth.authorized(h.auth.has_delete_role):
+| <a href="${h.url_for(controller='page', action='delete', id=c.page.id)}">Delete
+Page</a>
+% endif
 </p>
-## comment link
+## Comment links
 <p>
-<a href="${h.url_for(pageid=c.page.id, controller='comment', action='list')}">Comment (${str(c.comment_count)})</a>
-| <a href="${h.url_for(pageid=c.page.id, controller='comment', action='new')}">Add Comment </a>
+  <a href="${h.url_for(pageid=c.page.id, controller='comment', action='list')}"
+>Comments (${str(c.comment_count)})</a>
+| <a href="${h.url_for(pageid=c.page.id, controller='comment', action='new')}"
+>Add Comment</a>
 </p>
-### Section links
+## Section links
 <p>
-<a href="${h.url_for(controller='section', action='new', section=c.page.section, before=c.page.before)}">New Section</a>
-| <a href="${h.url_for(controller='section', action='edit', id=c.page.section)}">Edit Section</a>
-| <a href="${h.url_for(controller='section', action='delete', id=c.page.section)}">Delete Section and Index Page</a>
-### tag link
-<p>
-<a href="${h.url_for(controller='tag', action='list')}">Tag list</a>
-| <a href="${h.url_for(controller='tag', action='new')}">Add Tag</a>
+  <a href="${h.url_for(controller='section', action='new', section=c.page.section,
+before=c.page.before)}">New Section</a>
+% if h.auth.authorized(h.auth.is_valid_user):
+| <a href="${h.url_for(controller='section', action='edit', id=c.page.section)}"
+>Edit Section</a>
+% endif
+% if h.auth.authorized(h.auth.has_delete_role):
+| <a href="${h.url_for(controller='section', action='delete', id=c.page.section)}"
+>Delete Section and Index Page</a>
+% endif
 </p>
+## Tag links
+<p>
+% if h.auth.authorized(h.auth.has_delete_role):
+<a href="${h.url_for(controller='tag', action='list')}">All Tags</a>
+|
+% endif
+<a href="${h.url_for(controller='tag', action='new')}">Add Tag</a></p>
 ## Include the parent footer too
 ${parent.footer()}
 </%def>

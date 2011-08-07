@@ -74,7 +74,8 @@ class TagController(BaseController):
         response.status_int = 302
         response.headers['location'] = h.url_for(controller='tag', action='view', id=tag.id)
         return "Moved temporarily"
-        
+    
+    @authorize(h.auth.has_delete_role)       
     def edit(self, id=None):
         if id is None:
             abort(404)
@@ -86,7 +87,8 @@ class TagController(BaseController):
             'name': tag.name,
         }
         return htmlfill.render(render('/derived/tag/edit.html'), values)
-        
+    
+    @authorize(h.auth.has_delete_role)       
     @restrict('POST')
     @validate(schema=NewTagForm(), form='edit')
     def save(self, id=None):
@@ -104,7 +106,8 @@ class TagController(BaseController):
         response.headers['location'] = h.url_for(controller='tag', action='view',
             id=tag.id)
         return "Moved temporarily"
-         
+    
+    @authorize(h.auth.has_delete_role)        
     def list(self):
         records = meta.Session.query(model.Tag)
         c.paginator = paginate.Page(
@@ -115,7 +118,8 @@ class TagController(BaseController):
             action='list',
             )
         return render('/derived/tag/list.html')
-          
+    
+    @authorize(h.auth.has_delete_role)         
     def delete(self, id=None):
        if id is None:
            abort(404)
