@@ -14,6 +14,8 @@ from simplesite.model import meta
 import simplesite.lib.helpers as h
 import webhelpers.paginate as paginate
 from simplesite.controllers.nav import NewNavForm, ValidBefore
+from authkit.authorize.pylons_adaptors import authorize
+from authkit.authenticate.form import Form
 
 log = logging.getLogger(__name__)
 
